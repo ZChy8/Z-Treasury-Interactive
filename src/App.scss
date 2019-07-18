@@ -1,0 +1,837 @@
+@keyframes coin {
+	from {
+		transform: rotateY(0deg);
+	}
+	to {
+		transform: rotateY(180deg);
+	}
+}
+
+html,
+body {
+	height: 100%;
+	margin: 0em;
+	background-color: #efefef;
+	position: relative;
+}
+html {
+	width: 100vw;
+	overflow-x: hidden;
+}
+
+button,
+input {
+	border: none;
+	background: none;
+	outline: none;
+	cursor: pointer;
+}
+
+a {
+	text-decoration: none;
+}
+
+.button {
+	padding: 0.5rem;
+	color: #eee;
+	width: 20%;
+	margin: 1.5em auto 0.5em auto;
+	font-size: 1.02em;
+	i {
+		margin-left: 0.1em;
+	}
+	background-color: #26f;
+
+	transition: transform 0.25s ease-in-out;
+
+	&:hover {
+		transform: scale(1.05);
+	}
+}
+
+.App,
+#root {
+	height: 100%;
+	.nav-bar {
+		height: 4em;
+		box-sizing: border-box;
+		padding: 0em 2em;
+		display: flex;
+		justify-content: flex-end;
+		align-items: center;
+		a {
+			margin: 1em;
+		}
+	}
+}
+
+.home {
+	.section-hero {
+		height: 90vh;
+		padding: 1em;
+		display: flex;
+
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+
+		.welcome-header {
+			font-size: 3em;
+		}
+
+		.welcome-desc {
+			width: 30%;
+			text-align: center;
+			line-height: 1.4;
+		}
+
+		.welcome-actions {
+			display: flex;
+			flex-direction: column;
+			margin: 1em 0em 10em 0em;
+			width: 15%;
+
+			button {
+				padding: 0.5rem;
+				cursor: pointer;
+				width: 100%;
+				font-size: 1.02em;
+				margin: 0.25em;
+
+				i {
+					margin-left: 0.2em;
+				}
+			}
+
+			.action-create {
+				color: #eee;
+				background-color: #0a0;
+				transition: transform 0.25s ease-in-out;
+
+				&:hover {
+					transform: scale(1.05);
+				}
+			}
+
+			.action-learn {
+				border: 2px solid #555;
+				color: #555;
+				transition: border-color 0.25s ease-in-out,
+					color 0.25s ease-in-out;
+
+				i {
+					position: relative;
+					left: 0px;
+					transition: left 0.25s ease-in-out;
+				}
+
+				&:hover {
+					color: black;
+					border-color: black;
+					i {
+						left: 1em;
+					}
+				}
+			}
+		}
+	}
+	.section-about {
+		.about-header {
+			margin: 1em;
+			padding-top: 1em;
+			text-align: center;
+		}
+		.feature {
+			display: flex;
+			width: 80%;
+			margin: 5em auto;
+
+			.feature-image {
+				height: 100%;
+				margin-top: 1em;
+			}
+			.feature-desc {
+				.feature-title {
+					text-align: center;
+				}
+				.feature-blurb {
+					font-size: 1.25em;
+					width: 75%;
+					margin: auto;
+					line-height: 1.7;
+				}
+			}
+
+			&:nth-child(2n + 1) {
+				flex-direction: row-reverse;
+			}
+		}
+	}
+	.scroll-up {
+		position: fixed;
+		right: 3em;
+		bottom: 3em;
+		width: 3em;
+		height: 3em;
+		cursor: pointer;
+		color: white;
+		border-radius: 1000px;
+		background-color: #555;
+		transition: background-color 0.25s ease-in-out;
+		&:hover {
+			background-color: #666;
+		}
+		&:active {
+			background-color: #444;
+		}
+	}
+}
+.new {
+	text-align: center;
+	.name-input {
+		border-bottom: 2px solid black;
+		font-size: 3em;
+		margin: 0.5em auto 1em auto;
+		width: 40%;
+	}
+	.new-tabs {
+		display: flex;
+		justify-content: space-around;
+		width: 40%;
+		margin: auto;
+
+		.new-tab {
+			color: black;
+			text-transform: capitalize;
+			font-size: 1.25em;
+
+			padding: 0.25em;
+			border-bottom: 1.5px solid rgba(0, 0, 0, 0);
+
+			transition: color 0.25s ease-in-out,
+				border-bottom-color 0.25s ease-in-out;
+
+			&:hover,
+			&.active-link {
+				color: #090;
+				border-bottom-color: #090;
+			}
+		}
+	}
+
+	.tab-objects {
+		padding: 3em;
+
+		.create-object {
+			border-radius: 1000px;
+			width: 4em;
+			height: 4em;
+			margin: 1em;
+			color: white;
+			background-color: #0c0;
+			transition: 0.25s background-color ease-in-out;
+			box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.25);
+			&:hover {
+				background-color: #0d0;
+			}
+			&:active {
+				background-color: #0b0;
+			}
+		}
+
+		.object-card-container {
+			position: relative;
+
+			.object-card-delete {
+				position: absolute;
+				visibility: hidden;
+				top: 50%;
+				right: 20%;
+				transform: translate(50%, -50%);
+				border-radius: 1000px;
+				width: 3em;
+				height: 3em;
+				margin: 1em;
+				color: white;
+				background-color: #c00;
+				transition: 0.25s background-color ease-in-out;
+				box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.25);
+
+				&:hover {
+					background-color: #d00;
+				}
+				&:active {
+					background-color: #b00;
+				}
+			}
+
+			&:hover {
+				.object-card-delete {
+					visibility: visible;
+				}
+			}
+
+			.object-card {
+				width: 40%;
+				margin: 2em auto;
+				box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.25);
+
+				.img {
+					height: 15em;
+					position: relative;
+					cursor: pointer;
+					overflow: hidden;
+					padding: 1em;
+
+					.img-bg {
+						background-color: #fff;
+						position: absolute;
+						left: 0px;
+						right: 0px;
+						top: 0px;
+						bottom: 0px;
+						background-position: center center;
+						background-size: contain;
+						background-repeat: no-repeat;
+						transition: filter 0.25s ease-in-out;
+					}
+
+					.actions {
+						position: relative;
+						width: 100%;
+						height: 100%;
+						bottom: 100%;
+						display: flex;
+						justify-content: space-around;
+						align-items: center;
+						transition: bottom 0.15s ease-in-out;
+
+						.img-upload {
+							display: none;
+							position: absolute;
+						}
+
+						.action {
+							padding: 1px 6px;
+							font-size: 13.3333px;
+							display: flex;
+							justify-content: center;
+							align-items: center;
+							width: 4em;
+							cursor: pointer;
+							height: 4em;
+							border-radius: 1000px;
+							border: 1.5px solid white;
+							color: white;
+							transition: background-color 0.25s ease-in-out, transform 0.15s ease-in-out;
+							box-sizing: border-box;
+							background-color: rgba(0, 0, 0, 0.75);
+							box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.25);
+
+							&:hover {
+								background-color: rgba(0, 0, 0, 1);
+								transform: scale(1.1, 1.1);
+							}
+						}
+					}
+
+					&:hover {
+						.img-bg {
+							filter: brightness(0.6);
+						}
+						.actions {
+							bottom: 0%;
+						}
+					}
+				}
+				.desc {
+					padding: 1em;
+					min-height: 5em;
+
+					.object-name {
+						width: 50%;
+						margin: 1em auto 2em auto;
+						display: block;
+						border-bottom: 1px solid black;
+						font-size: 1.2em;
+					}
+
+					.field {
+						width: 100%;
+						display: flex;
+						flex-wrap: nowrap;
+						align-items: center;
+						font-size: 1.2em;
+
+						.field-label,
+						.field-value {
+							font-size: 1rem;
+							width: 50%;
+							height: 100%;
+							flex-grow: 1;
+							border: 2px solid #ddd;
+							box-sizing: border-box;
+							outline: none;
+
+							padding: 0.25em;
+						}
+
+						.invalid {
+							border: 2px solid red;
+						}
+					}
+					.add-field {
+						padding: 0.5rem;
+						color: #eee;
+						width: 75%;
+						margin: 1.5em auto 0.5em auto;
+						font-size: 1.02em;
+						i {
+							margin-left: 0.1em;
+						}
+						background-color: #26f;
+
+						transition: transform 0.25s ease-in-out;
+
+						&:hover {
+							transform: scale(1.05);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	.tab-questions {
+		padding: 3em;
+
+		.no-questions {
+		}
+
+		.create-question {
+			border-radius: 1000px;
+			width: 4em;
+			height: 4em;
+			border: none;
+			margin: 1em;
+			color: white;
+			background-color: #0c0;
+			transition: 0.25s background-color ease-in-out;
+			&:hover {
+				background-color: #0d0;
+			}
+			&:active {
+				background-color: #0b0;
+			}
+		}
+		.question-card-container {
+			position: relative;
+			min-height: 5em;
+			box-sizing: border-box;
+
+			.question-card-delete {
+				position: absolute;
+				visibility: hidden;
+				top: 35%;
+				right: 4%;
+				transform: translate(50%, -50%);
+				border-radius: 1000px;
+				width: 3em;
+				height: 3em;
+				border: none;
+				margin: 1em;
+				color: white;
+				background-color: #c00;
+				transition: 0.25s background-color ease-in-out;
+
+				&:hover {
+					background-color: #d00;
+				}
+				&:active {
+					background-color: #b00;
+				}
+			}
+
+			&:hover {
+				.question-card-delete {
+					visibility: visible;
+				}
+			}
+
+			.question-card {
+				width: 70%;
+				height: 5em;
+				margin: 2em auto;
+				box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.25);
+				border-radius: 5px;
+				display: flex;
+				position: relative;
+
+				input {
+					width: 50%;
+					padding: 1.6em;
+					font-size: 1.25em;
+					box-sizing: border-box;
+				}
+				.query {
+					width: 50%;
+					box-sizing: border-box;
+				}
+				.edit-query {
+					background: none;
+					border: none;
+					padding: 0.5rem;
+					cursor: pointer;
+					color: #eee;
+					width: 75%;
+					margin: 1.5em auto 0.5em auto;
+					// border-radius: 5px;
+					font-size: 1.02em;
+					i {
+						margin-left: 0.1em;
+					}
+					background-color: #26f;
+
+					transition: transform 0.25s ease-in-out;
+
+					&:hover {
+						transform: scale(1.05);
+					}
+				}
+			}
+			.query-modal {
+				position: fixed;
+				top: 50%;
+				left: 50%;
+				width: 50vh;
+				height: 50vh;
+				transform: translate(-50%, -50%) scale(0);
+				box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.25);
+				background-color: #fff;
+				overflow: auto;
+				z-index: 5;
+				transition: transform 0.25s ease-in-out;
+				padding: 1em;
+				display: flex;
+				flex-direction: column;
+
+				&.activated {
+					transform: translate(-50%, -50%);
+				}
+
+				.query-textarea {
+					flex-grow: 1;
+					width: 100%;
+					min-height: 20vh;
+					resize: none;
+				}
+				.query-fields {
+					display: flex;
+					flex-wrap: wrap;
+
+					a {
+						margin: 0.25em;
+					}
+				}
+
+				.question-actions {
+					bottom: 0px;
+					left: 0px;
+					width: 100%;
+					display: flex;
+					justify-content: space-around;
+					align-items: center;
+					padding: 1em;
+					box-sizing: border-box;
+					.save-question,
+					.cancel-question {
+						position: relative;
+						background: none;
+						border: none;
+						padding: 0.5rem;
+						cursor: pointer;
+						color: #eee;
+						font-size: 1.02em;
+						transition: transform 0.25s ease-in-out;
+						width: 40%;
+						&:hover {
+							transform: scale(1.05);
+						}
+					}
+					.save-question {
+						background-color: #090;
+					}
+					.cancel-question {
+						background-color: #c00;
+					}
+				}
+			}
+		}
+	}
+}
+
+.game-list {
+	overflow: auto;
+	.gamelist-header {
+		padding: 3em;
+		text-align: center;
+		background-color: #eee;
+		margin: 0em;
+	}
+	.list {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: space-around;
+		align-items: flex-start;
+		width: 85%;
+		margin: auto;
+
+		.game-card {
+			flex-basis: 22em;
+			display: flex;
+			flex-direction: column;
+
+			text-align: center;
+			box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.25);
+			margin: 2em;
+
+			.desc {
+				padding: 1em;
+			}
+			.actions {
+				width: 100%;
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				padding: 1em;
+				box-sizing: border-box;
+				a {
+					width: 45%;
+					text-decoration: none;
+				}
+				.edit,
+				.play {
+					border: none;
+					padding: 0.5rem;
+					cursor: pointer;
+					color: #eee;
+					font-size: 1.02em;
+					transition: transform 0.25s ease-in-out;
+					width: 100%;
+					&:hover {
+						transform: scale(1.05);
+					}
+				}
+				.edit {
+					background-color: #26f;
+				}
+				.play {
+					background-color: #090;
+				}
+			}
+		}
+
+		.game-card-new {
+			align-self: stretch;
+			justify-self: stretch;
+			margin: 2em;
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			min-width: 20em;
+			min-height: 19em;
+			align-items: center;
+			position: relative;
+			p {
+				position: absolute;
+				bottom: 25%;
+			}
+			.new-game {
+				border-radius: 1000px;
+				width: 4em;
+				height: 4em;
+				border: none;
+				margin: 1em;
+				cursor: pointer;
+				color: white;
+				background-color: #0c0;
+				transition: 0.25s background-color ease-in-out;
+				&:hover {
+					background-color: #0d0;
+				}
+				&:active {
+					background-color: #0b0;
+				}
+			}
+		}
+	}
+}
+
+.play {
+	height: 100%;
+	display: grid;
+	grid-template-areas:
+		"menu question score"
+		". choices ."
+		". actions .";
+	grid-template-columns: 20% auto 20%;
+	grid-template-rows: 10% auto 10%;
+	position: relative;
+	.sidebar {
+		position: absolute;
+		height: 100%;
+		top: 0px;
+		right: 100%;
+		transition: transform 0.25s ease-in-out;
+		background-color: #fff;
+		overflow: auto;
+		width: 20%;
+		box-shadow: 0px 0px 15px 0px rgba(0, 0, 0, 0.25);
+		padding: 1em;
+		.links {
+			display: flex;
+			flex-direction: column;
+
+			a {
+				text-decoration: none;
+				font-size: 1.25em;
+			}
+		}
+		&.active {
+			transform: translateX(100%);
+		}
+		.close {
+			font-size: 1.8em;
+			padding: 0em 0.5rem;
+			margin-bottom: 1em;
+			cursor: pointer;
+		}
+	}
+	.menu {
+		grid-area: menu;
+		font-size: 1.8em;
+		padding: 1rem 1.5rem;
+		cursor: pointer;
+	}
+	.question {
+		grid-area: question;
+		padding: 2em;
+		display: flex;
+		align-items: center;
+		box-shadow: 0px 0px 10px 0px rgba(0, 0, 0, 0.25);
+	}
+	.score {
+		&:before {
+			content: "Score:";
+			margin-right: 0.25em;
+		}
+		grid-area: score;
+		padding: 2em;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
+	.choices {
+		grid-area: choices;
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
+		align-items: center;
+		align-content: center;
+
+		.object {
+			margin: 1em;
+			perspective: 600px;
+			.image-container {
+				border-radius: 500em;
+				background-position: center center;
+				background-size: contain;
+				width: 5em;
+				height: 5em;
+				position: relative;
+				cursor: pointer;
+				transition: filter 0.25s ease-in-out;
+				transform-style: preserve-3d;
+
+				.check,
+				.check-indicator,
+				.times-indicator {
+					border-radius: inherit;
+					position: absolute;
+					left: 0px;
+					top: 0px;
+					width: 5rem;
+					height: 5rem;
+					display: flex;
+					justify-content: center;
+					align-items: center;
+					color: #fff;
+					font-size: 2em;
+				}
+				.check,
+				.check-indicator {
+					background-color: #0c0;
+				}
+				.check-indicator,
+				.times-indicator {
+					transform: rotateY(180deg);
+				}
+				.times-indicator {
+					background-color: #d00;
+				}
+
+				.check {
+					opacity: 0;
+					transition: opacity 0.25s ease-in-out;
+					&.picked {
+						opacity: 1;
+					}
+				}
+
+				&:not(.object-result .image-container):hover {
+					filter: brightness(0.8);
+				}
+				&.flipped {
+					animation-name: coin;
+					animation-duration: 0.5s;
+					animation-iteration-count: 1;
+					animation-direction: alternate;
+					animation-fill-mode: forwards;
+				}
+			}
+			.name {
+				text-align: center;
+			}
+		}
+	}
+	.actions {
+		grid-area: actions;
+		display: flex;
+		justify-content: space-around;
+		align-items: center;
+		padding: 1em;
+		box-sizing: border-box;
+		.reset,
+		.submit {
+			position: relative;
+			background: none;
+			border: none;
+			padding: 0.5rem;
+			cursor: pointer;
+			color: #eee;
+			font-size: 1.02em;
+			transition: transform 0.25s ease-in-out;
+			width: 40%;
+			height: 100%;
+			&:hover {
+				transform: scale(1.05);
+			}
+		}
+		.reset {
+			background-color: #c00;
+		}
+		.submit {
+			background-color: #090;
+		}
+	}
+}

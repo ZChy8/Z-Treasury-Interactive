@@ -5,6 +5,7 @@
   "dependencies": {
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
+    "react-router-dom": "^5.0.1",
     "react-scripts-parcel": "0.0.38"
   },
   "scripts": {
@@ -25,5 +26,9 @@
       "Firefox ESR",
       "not ie < 11"
     ]
+  },
+  "devDependencies": {
+    "babel-core": "^6.26.3",
+    "sass": "^1.22.4"
   }
 }
