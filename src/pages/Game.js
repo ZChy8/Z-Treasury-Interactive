@@ -1,217 +1,250 @@
-import React, { Fragment, useEffect, useState } from "react";
+import React, { Fragment, useEffect, useState, Component } from "react";
 import { Link, Redirect, Route } from "react-router-dom";
-import New from "./New";
+import Editor from "./Editor";
+import { randomize, memoize1, group } from "../util";
 
-let randomize = a => a.sort((a, b) => ~~(Math.random() > 0.5) - 1);
+class Play extends Component {
+	constructor(props) {
+		super(props);
+		this.state = {
+			ui: "preload",
+			sidebar: false,
 
-function Play({ game, getGame }) {
-	// States: no-game, preload, question, no-questions, answered, final
-	let [state, setUiState] = useState("preload");
-	let [sidebar, setSidebar] = useState(false);
-	let [gameData, setGameData] = useState({});
+			gameData: {},
+			questionList: [],
+			currentQuestion: 0,
+			score: 0,
+			picked: {},
+			choices: [],
+			results: []
+		};
+		this.getGame = props.getGame;
+		this.gameId = props.game;
+		this.maxNumber = 30;
+	}
 
-	let [questionList, setQuestionList] = useState([]);
-	let [question, setQuestion] = useState(0);
-	let [score, setScore] = useState(0);
-	let [picked, setPicked] = useState({});
-	let [choices, setChoices] = useState([]);
-	let [objects, setObjects] = useState([]);
+	componentDidMount() {
+		const gameData = this.getGame(this.gameId);
 
-	let [results, setResults] = useState([]);
+		if (gameData === undefined) return this.transition("no-game");
+		if (gameData.questions.length === 0)
+			return this.transition("no-questions");
 
-	const maxNumber = 30;
+		const questionList = randomize(gameData.questions);
+		const choices = this.calculateChoices(
+			gameData,
+			questionList,
+			this.state.currentQuestion
+		);
 
-	useEffect(() => {
-		let val = getGame(game);
+		this.setState({
+			gameData,
+			questionList,
+			choices
+		});
+		this.transition("question");
+	}
 
-		if (val === undefined) return setUiState("no-game");
-		if (val.questions.length === 0) return setUiState("no-questions");
+	calculateChoices({ objects, fields }, questionList, currentQuestion) {
+		const currentPredicate = obj =>
+			memoize1(questionList[currentQuestion].query.execute(obj, fields));
 
-		let { name, objects, questions, fields} = val;
+		return randomize(
+			group(objects, currentPredicate).slice(0, this.maxNumber)
+		);
+	}
 
-		let qList = randomize(questions);
+	transition(ui) {
+		this.setState({
+			ui
+		});
+	}
 
-		let current = qList[question];
-		let correct = objects.filter(obj => current.query.execute(obj, fields));
-		let extra = randomize(
-			objects.filter(obj => !correct.includes(obj))
-		).slice(0, maxNumber - correct.length);
+	toggleSidebar = () => {
+		this.setState(({ sidebar }) => ({
+			sidebar: !sidebar
+		}));
+	};
 
-		setQuestionList(qList);
-		setGameData(val);
-		setUiState("question");
-		setObjects(objects);
-		setChoices(randomize(correct.concat(extra)));
-	}, []);
+	createPicker = id => {
+		return v => {
+			this.setState(({ picked }) => ({
+				picked: {
+					...picked,
+					[id]: v
+				}
+			}));
+		};
+	};
+	resetPicked = () => {
+		this.setState({
+			picked: {}
+		});
+	};
 
-	return (
-		<div className="play">
-			<div className={"sidebar" + (sidebar ? " active" : "")}>
-				<div className="close" onClick={() => setSidebar(false)}>
-					<i className="fa fa-times" />
-				</div>
-				<div className="links">
+	showAnswers = () => {
+		let {
+			questionList,
+			currentQuestion,
+			choices,
+			score,
+			gameData,
+			picked
+		} = this.state;
+
+		const currentPredicate = questionList[currentQuestion].query.execute;
+		const results = choices.map(object => ({
+			id: object.id,
+			res: currentPredicate(object, gameData.fields),
+			picked: !!picked[object.id],
+			object
+		}));
+		const newScore = results.reduce((a, { res }) => a + res, 0);
+
+		this.setState({
+			results,
+			score: score + newScore
+		});
+		this.transition("answered");
+	};
+	nextQuestion = () => {
+		let { currentQuestion, questionList, gameData } = this.state;
+		const newQuestion = currentQuestion + 1;
+		if (newQuestion >= questionList.length) return this.transition("final");
+
+		this.setState({
+			picked: {},
+			currentQuestion: newQuestion,
+			ui: "question",
+			choices: this.calculateChoices(
+				gameData,
+				questionList,
+				currentQuestion
+			)
+		});
+	};
+
+	render() {
+		let {
+			sidebar,
+			questionList,
+			currentQuestion,
+			score,
+			picked,
+			gameData,
+			choices,
+			results
+		} = this.state;
+		return (
+			<div className="play">
+				<Sidebar active={sidebar} toggle={this.toggleSidebar}>
 					<Link to="/home">Home</Link>
 					<Link to="/games">Games</Link>
 					<Link to="/new">New</Link>
+				</Sidebar>
+				<div className="menu" onClick={this.toggleSidebar}>
+					<i className="fa fa-bars" />
 				</div>
-			</div>
-			<div className="menu" onClick={() => setSidebar(!sidebar)}>
-				<i className="fa fa-bars" />
-			</div>
-			{{
-				preload: () => <p>Loading</p>,
-				"no-questions": () => <p>No Questions</p>,
-				"no-game": () => <Redirect to="/games" />,
-				question: () => {
-					let current = questionList[question];
-					console.log(current);
+				<div className="score">{score}</div>
+				{{
+					preload: () => <p>Loading</p>,
+					"no-questions": () => <p>No Questions</p>,
+					"no-game": () => <Redirect to="/games" />,
+					question: () => {
+						let current = questionList[currentQuestion];
 
-					return (
-						<Fragment>
-							<div className="question">
-								{questionList[question].name}
-							</div>
-							<div className="score">{score}</div>
-							<div className="choices" key={"choices"}>
-								{choices.map(c => (
-									<Choice
-										key={"choice-" + c.id}
-										object={c}
-										setPicked={v =>
-											setPicked({
-												...picked,
-												[c.id]: v
-											})
-										}
-										picked={picked[c.id]}
-									/>
-								))}
-							</div>
-							<div className="actions">
-								<button
-									className="reset"
-									onClick={() => setPicked({})}>
-									<i className="fa fa-sync" /> Reset
-								</button>
-								<button
-									className="submit"
-									onClick={() => {
-										let results = choices.map(object => ({
-											id: object.id,
-											res: current.query.execute(object, gameData.fields),
-											picked: !!picked[object.id],
-											object
-										}));
-										console.log(results);
-										setResults(results);
-										setScore(
-											score +
-												results.reduce(
-													(a, { res }) =>
-														a + (res ? 1 : 0),
-													0
-												)
-										);
-										setUiState("answered");
-									}}>
-									<i className="fa fa-check" /> Submit
-								</button>
-							</div>
-						</Fragment>
-					);
-				},
-				answered: () => {
-					return (
-						<Fragment>
-							<div className="question">
-								{questionList[question].name}
-							</div>
-							<div className="score">{score}</div>
-							<div className="choices" key={"choices"}>
-								{results.map(c => (
-									<Result
-										key={"choice-" + c.id}
-										result={c.res}
-										object={c.object}
-										picked={c.picked}
-									/>
-								))}
-							</div>
-							<div className="actions">
-								<button disabled className="reset">
-									<i className="fa fa-sync" /> Reset
-								</button>
-								<button
-									className="next"
-									onClick={() => {
-										let newQ = question + 1;
-										if (newQ >= questionList.length)
-											return setUiState("final");
-
-										let current = questionList[newQ];
-										let correct = objects.filter(obj =>
-											current.query.execute(obj)
-										);
-										let extra = randomize(
-											objects.filter(
-												obj => !correct.includes(obj)
-											)
-										).slice(0, maxNumber - correct.length);
-										setPicked({});
-										setQuestion(newQ);
-										setUiState("question");
-										setChoices(
-											randomize(correct.concat(extra))
-										);
-									}}>
-									<i className="fa fa-check" /> Next
-								</button>
-							</div>
-						</Fragment>
-					);
-				},
-				final: () => {
-						return <Fragment>
-							<div className="question">
-								No More Questions
-							</div>
-							<div className="score">
-								{score}
-							</div>
-							<div
-								className="choices"
-								key={"choices"}
-							>
-								<div className="final">
-									Your final score was {score}
+						return (
+							<Fragment>
+								<div className="question">{current.name}</div>
+								<div className="choices" key={"choices"}>
+									{choices.map(c => (
+										<Choice
+											key={"choice-" + c.id}
+											object={c}
+											setPicked={this.createPicker(c.id)}
+											picked={picked[c.id]}
+										/>
+									))}
 								</div>
-							</div>
-							<div className="actions">
-								<Link to="/games">
-									<button className="back">
-										<i className="fa fa-arrow-left" />
-										Back to List
+								<div className="actions">
+									<button
+										className="reset"
+										onClick={this.resetPicked}>
+										<i className="fa fa-sync" /> Reset
 									</button>
-								</Link>
-								<Link
-									to={
-										"/game/" +
-										gameData.gameId +
-										"/edit"
-									}>
-									<button className="next">
-										<i className="fa fa-edit" />
-										Next
+									<button
+										className="submit"
+										onClick={this.showAnswers}>
+										<i className="fa fa-check" /> Submit
 									</button>
-								</Link>
-							</div>
-						</Fragment>;
-				}
-			}[state]()}
-		</div>
-	);
+								</div>
+							</Fragment>
+						);
+					},
+					answered: () => {
+						let current = questionList[currentQuestion];
+						return (
+							<Fragment>
+								<div className="question">{current.name}</div>
+								<div className="choices" key={"choices"}>
+									{results.map(
+										({ id, res, object, picked }) => (
+											<Result
+												key={"choice-" + id}
+												result={res}
+												object={object}
+												picked={picked}
+											/>
+										)
+									)}
+								</div>
+								<div className="actions">
+									<button disabled className="reset">
+										<i className="fa fa-sync" /> Reset
+									</button>
+									<button
+										className="next"
+										onClick={this.nextQuestion}>
+										<i className="fa fa-check" /> Next
+									</button>
+								</div>
+							</Fragment>
+						);
+					},
+					final: () => {
+						return (
+							<Fragment>
+								<div className="question">
+									No More Questions
+								</div>
+								<div className="choices" key={"choices"}>
+									<div className="final">
+										Your final score was {score}
+									</div>
+								</div>
+								<div className="actions">
+									<Link to="/games">
+										<button className="back">
+											<i className="fa fa-arrow-left" />
+											Back to List
+										</button>
+									</Link>
+									<Link to={`/game/${gameData.gameId}/edit`}>
+										<button className="next">
+											<i className="fa fa-edit" />
+											Next
+										</button>
+									</Link>
+								</div>
+							</Fragment>
+						);
+					}
+				}[this.state.ui]()}
+			</div>
+		);
+	}
 }
+
 function Choice({ object, setPicked, picked }) {
 	return (
 		<div className="object" key={"choice-el-" + object.id}>
@@ -228,23 +261,20 @@ function Choice({ object, setPicked, picked }) {
 		</div>
 	);
 }
-function Result({ result, object, picked}) {
+function Result({ result, object, picked }) {
 	return (
-		<div
-			className="object object-result"
-			key={"choice-el-" + object.id}>
+		<div className="object object-result" key={"choice-el-" + object.id}>
 			<div
 				key={"choice-img-" + object.id}
 				className={
-					"image-container" +
-					(result && picked ? "" : " flipped")
+					"image-container" + (result && picked ? "" : " flipped")
 				}
 				style={{ backgroundImage: `url(${object.image})` }}>
 				{result && picked ? (
 					<div className={"check picked"}>
 						<i className="fa fa-check" />
 					</div>
-				) : ((result===picked) ? (
+				) : result === picked ? (
 					<div className="check-indicator">
 						<i className="fa fa-check" />
 					</div>
@@ -252,12 +282,23 @@ function Result({ result, object, picked}) {
 					<div className="times-indicator">
 						<i className="fa fa-times" />
 					</div>
-				))}
+				)}
 			</div>
 			<div className="name">{object.name || <br />}</div>
 		</div>
 	);
 }
+function Sidebar({ children, toggle, active }) {
+	return (
+		<div className={"sidebar" + (active ? " active" : "")}>
+			<div className="close" onClick={toggle}>
+				<i className="fa fa-times" />
+			</div>
+			<div className="links">{children}</div>
+		</div>
+	);
+}
+
 function Share() {
 	return <p>Share</p>;
 }
@@ -267,13 +308,12 @@ function Learn() {
 
 export default function GamePage({ match, getGame, saveGame }) {
 	let game = match.params.game;
-	console.log(match, game);
 	return (
 		<Fragment>
 			<Route
 				path={`${match.path}/edit`}
 				render={props => (
-					<New
+					<Editor
 						{...props}
 						game={game}
 						getGame={getGame}

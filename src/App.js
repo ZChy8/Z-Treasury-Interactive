@@ -1,9 +1,7 @@
 import React, { Fragment, useRef, useEffect, Component } from "react";
 import "./App.scss";
 import { BrowserRouter as Router, Route, Link } from "react-router-dom";
-import { Home, GamePage, New, GameList} from "./pages/index.js";
-// import { New } from "./pages/New";
-// import { GameList } from "./pages/Gamelist";
+import { Home, GamePage, Editor, GameList} from "./pages/index.js";
 
 class App extends Component {
 	constructor(props) {
@@ -39,7 +37,7 @@ class App extends Component {
 					<Route
 						path="/new"
 						render={() => (
-							<New
+							<Editor
 								saveGame={this.saveGame}
 								getGame={this.getGame}
 							/>

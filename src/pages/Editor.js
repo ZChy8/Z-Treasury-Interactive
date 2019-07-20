@@ -17,7 +17,7 @@ let QuestionFactory = id => ({
 	id,
 	name: "",
 	expression: "",
-	query: { execute: obj => false }
+	query: { execute: () => false }
 });
 let initial = v => ({
 	fields: ["asdf"],
@@ -29,17 +29,15 @@ let initial = v => ({
 	gameId: undefined,
 	...v
 });
-export default class New extends Component {
+export default class Editor extends Component {
 	constructor(props) {
 		super(props);
 		this.saveGame = props.saveGame;
-		console.log(props.getGame(props.game));
 		this.state = initial(
 			props.game
 				? { ...props.getGame(props.game), gameId: props.game }
 				: {}
 		);
-		console.log(this.state);
 		this.match = props.match;
 		window.logNewState = () => console.log(this.state, props);
 	}
@@ -75,9 +73,7 @@ export default class New extends Component {
 	};
 	editImg = (id, image) => {
 		this.setState(({ objects }) => ({
-			objects: objects.map((v, i) =>
-				i === id ? {...v, image} : v
-			)
+			objects: objects.map((v, i) => (i === id ? { ...v, image } : v))
 		}));
 	};
 	editObjectName = (id, name) => {
@@ -138,17 +134,21 @@ export default class New extends Component {
 	};
 	editQuestion = (id, expression) => {
 		console.trace(expression);
-		let f = parseExpr(expression)
+		let f = parseExpr(expression);
 		this.setState(({ questions }) => ({
 			questions: questions.map(question =>
 				id === question.id
 					? {
 							...question,
 							expression,
-							query: { execute: (obj, fields) => {
-								console.log("executed", f, expression);
-								return f(obj.fields, fields, console.log.bind(console))
-							}}
+							query: {
+								execute: (obj, fields) =>
+									f(
+										obj.fields,
+										fields,
+										console.log.bind(console)
+									)
+							}
 					  }
 					: question
 			)

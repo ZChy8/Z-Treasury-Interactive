@@ -55,3 +55,15 @@ export const getDataUrl = img => {
   // must be specified here
   return canvas.toDataURL();
 }
+
+export const randomize = a => a.sort((a, b) => ~~(Math.random() > 0.5) - 1);
+export const group = (a, p) => a.sort((a, b) => (p(a) ? -1 : 1));
+export const memoize1 = f => {
+	let mem = new Map();
+	return v => {
+		if (mem.has(v)) return mem.get(v);
+		let temp = f(v);
+		mem.set(v, temp);
+		return temp;
+	};
+};

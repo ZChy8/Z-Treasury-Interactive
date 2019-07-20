@@ -51,13 +51,9 @@ function ObjectCard({
 								id=""
 								className="img-upload"
 								onChange={evt => {
-									let f = evt.target.files[0];
 									let reader = new FileReader();
-									reader.onloadend = function(e) {
-										console.log(e);
-										editImg(id, e.target.result);
-									};
-									reader.readAsDataURL(f);
+									reader.onloadend = e => editImg(id, e.target.result);
+									reader.readAsDataURL(evt.target.files[0]);
 								}}
 							/>
 						</label>
