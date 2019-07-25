@@ -20,7 +20,7 @@ let QuestionFactory = id => ({
 	query: { execute: () => false }
 });
 let initial = v => ({
-	fields: ["asdf"],
+	fields: [],
 	objects: [],
 	objectId: 0,
 	questions: [],
